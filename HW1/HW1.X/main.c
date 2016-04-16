@@ -70,5 +70,8 @@ int main() {
         while(_CP0_GET_COUNT() < 24000){
             
         }
+        while(!PORTBbits.RB4){
+            LATAbits.LATA4 = 0;
+        }
     }
 }
