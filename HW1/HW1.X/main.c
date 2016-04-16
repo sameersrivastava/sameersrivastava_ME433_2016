@@ -2,8 +2,8 @@
 #include<sys/attribs.h>  // __ISR macro
 
 // DEVCFG0
-#pragma config DEBUG = ON // no debugging
-#pragma config JTAGEN = ON // no jtag
+#pragma config DEBUG = OFF // no debugging
+#pragma config JTAGEN = OFF // no jtag
 #pragma config ICESEL = ICS_PGx1 // use PGED1 and PGEC1
 #pragma config PWP = OFF // no write protect
 #pragma config BWP = OFF // no boot write protect
@@ -30,7 +30,7 @@
 #pragma config UPLLEN = ON // USB clock on
 
 // DEVCFG3
-#pragma config USERID = 0 // some 16bit userid, doesn't matter what
+#pragma config USERID = 0xABCD // some 16bit userid, doesn't matter what
 #pragma config PMDL1WAY = OFF // allow multiple reconfigurations
 #pragma config IOL1WAY = OFF // allow multiple reconfigurations
 #pragma config FUSBIDIO = ON // USB pins controlled by USB module
