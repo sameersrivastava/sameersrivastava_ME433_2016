@@ -59,14 +59,16 @@ int main() {
     
     TRISBbits.TRISB4 = 1; //Set B4 to input button
     TRISAbits.TRISA4 = 0; //Set A4 to output for LED
-    
-    
+  
     while(1) {
-	    // use _CP0_SET_COUNT(0) and _CP0_GET_COUNT() to test the PIC timing
-		// remember the core timer runs at half the CPU speed
+        _CP0_SET_COUNT(0);
         LATAbits.LATA4 = 1; //Turn on LED
-        
+        while(_CP0_GET_COUNT() < 12000){
+            
+        }
+        LATAbits.LATA4 = 0;
+        while(_CP0_GET_COUNT() < 24000){
+            
+        }
     }
-    
-    
 }
