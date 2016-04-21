@@ -12971,10 +12971,10 @@ Source: www.kingbright.com</description>
 <part name="J1" library="pcb_library" deviceset="USB" device="-MB-H"/>
 <part name="U$1" library="pcb_library" deviceset="SLIDE_SWITCH" device=""/>
 <part name="U$2" library="pcb_library" deviceset="MCP1702" device=""/>
-<part name="C1" library="pcb_library" deviceset="C-US" device="025-025X050"/>
+<part name="C1" library="pcb_library" deviceset="C-US" device="025-025X050" value="0.1uF"/>
 <part name="C2" library="pcb_library" deviceset="C-US" device="025-025X050" value="0.1uF"/>
 <part name="C3" library="pcb_library" deviceset="C-US" device="025-025X050" value="0.1uF"/>
-<part name="C4" library="pcb_library" deviceset="C-US" device="025-025X050"/>
+<part name="C4" library="pcb_library" deviceset="C-US" device="025-025X050" value="0.1uF"/>
 <part name="C5" library="pcb_library" deviceset="CPOL-US" device="B45181A" value="10uF"/>
 <part name="C6" library="pcb_library" deviceset="CPOL-US" device="B45181A" value="10uF"/>
 <part name="LED1" library="pcb_library" deviceset="LED" device="3MM" value="red"/>
@@ -13015,8 +13015,8 @@ Source: www.kingbright.com</description>
 <part name="GND18" library="pcb_library" deviceset="GND" device=""/>
 <part name="R1" library="pcb_library" deviceset="R-US_" device="0204/7" value="330"/>
 <part name="R2" library="pcb_library" deviceset="R-US_" device="0204/7" value="330"/>
-<part name="R3" library="pcb_library" deviceset="R-US_" device="0204/7"/>
-<part name="R4" library="pcb_library" deviceset="R-US_" device="0204/7"/>
+<part name="R3" library="pcb_library" deviceset="R-US_" device="0204/7" value="10K"/>
+<part name="R4" library="pcb_library" deviceset="R-US_" device="0204/7" value="10K"/>
 </parts>
 <sheets>
 <sheet>
@@ -13066,7 +13066,7 @@ Source: www.kingbright.com</description>
 <instance part="GND14" gate="1" x="22.86" y="-7.62"/>
 <instance part="GND15" gate="1" x="-27.94" y="2.54" rot="R180"/>
 <instance part="GND16" gate="1" x="-35.56" y="-10.16"/>
-<instance part="GND17" gate="1" x="-27.94" y="-27.94"/>
+<instance part="GND17" gate="1" x="-27.94" y="-30.48"/>
 <instance part="GND18" gate="1" x="-30.48" y="30.48"/>
 <instance part="R1" gate="G$1" x="58.42" y="53.34" rot="R90"/>
 <instance part="R2" gate="G$1" x="76.2" y="53.34" rot="R90"/>
@@ -13173,6 +13173,10 @@ Source: www.kingbright.com</description>
 <pinref part="GND9" gate="1" pin="GND"/>
 <wire x1="116.84" y1="30.48" x2="109.22" y2="30.48" width="0.1524" layer="91"/>
 </segment>
+<segment>
+<pinref part="C4" gate="G$1" pin="2"/>
+<pinref part="GND17" gate="1" pin="GND"/>
+</segment>
 </net>
 <net name="USBID" class="0">
 <segment>
@@ -13276,6 +13280,7 @@ Source: www.kingbright.com</description>
 <wire x1="-27.94" y1="-12.7" x2="-27.94" y2="-20.32" width="0.1524" layer="91"/>
 <pinref part="+3V7" gate="G$1" pin="+3V3"/>
 <wire x1="-25.4" y1="-12.7" x2="-25.4" y2="-10.16" width="0.1524" layer="91"/>
+<junction x="-25.4" y="-12.7"/>
 </segment>
 <segment>
 <pinref part="U$3" gate="G$1" pin="28.AVDD"/>
@@ -13319,6 +13324,11 @@ Source: www.kingbright.com</description>
 <pinref part="U$3" gate="G$1" pin="12.A4/LED"/>
 <wire x1="-10.16" y1="-10.16" x2="-17.78" y2="-10.16" width="0.1524" layer="91"/>
 <label x="-20.32" y="-10.16" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="U$5" gate="G$1" pin="3.A4/LED"/>
+<wire x1="63.5" y1="7.62" x2="55.88" y2="7.62" width="0.1524" layer="91"/>
+<label x="55.88" y="7.62" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="PGC" class="0">
@@ -13522,13 +13532,6 @@ Source: www.kingbright.com</description>
 <pinref part="U$3" gate="G$1" pin="7.B3"/>
 <wire x1="-10.16" y1="2.54" x2="-17.78" y2="2.54" width="0.1524" layer="91"/>
 <label x="-20.32" y="2.54" size="1.778" layer="95"/>
-</segment>
-</net>
-<net name="A4/USER" class="0">
-<segment>
-<pinref part="U$5" gate="G$1" pin="3.A4/LED"/>
-<wire x1="63.5" y1="7.62" x2="55.88" y2="7.62" width="0.1524" layer="91"/>
-<label x="55.88" y="7.62" size="1.778" layer="95"/>
 </segment>
 </net>
 </nets>

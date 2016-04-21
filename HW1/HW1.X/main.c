@@ -63,11 +63,11 @@ int main() {
     while(1) {
         _CP0_SET_COUNT(0);
         LATAbits.LATA4 = 1; //Turn on LED
-        while(_CP0_GET_COUNT() < 12000){
+        while(_CP0_GET_COUNT() < 12000000){
             
         }
         LATAbits.LATA4 = 0;
-        while(_CP0_GET_COUNT() < 24000){
+        while(_CP0_GET_COUNT() < 24000000){
             
         }
         while(!PORTBbits.RB4){
