@@ -1,20 +1,19 @@
-#include "PIC32.h"       // constants, funcs for startup and UART
-// Demonstrates spi by accessing external ram
-// PIC is the master, ram is the slave
-// Uses microchip 23K256 ram chip (see the data sheet for protocol details)
-// SDO4 -> SI (pin F5 -> pin 5)
-// SDI4 -> SO (pin F4 -> pin 2)
-// SCK4 -> SCK (pin B14 -> pin 6)
-// SS4 -> CS (pin B8 -> pin 1)
-// Additional SRAM connections
-// Vss (Pin 4) -> ground
-// Vcc (Pin 8) -> 3.3 V
-// Hold (pin 7) -> 3.3 V (we don't use the hold function)
-// 
-// Only uses the SRAM's sequential mode
-//
-#define CS LATBbits.LATB8       // chip select pin
+#include"PIC32.h"
+#include<math.h>
 
+#define CS LATBbits.LATB8 // chip select pin
+
+static volatile char sineWave[200];   // sine waveform
+static volatile char triangleWave[200];   // triangle waveform
+
+// send a byte via spi and return the response
+unsigned char spi_io(unsigned char o) {
+  SPI1BUF = o;
+  while(!SPI1STATbits.SPIRBF) { // wait to receive the byte
+    ;
+  }
+  return SPI1BUF;
+}
 
 // Initialize SPI1 Communication
 void init_spi1(){
@@ -34,30 +33,56 @@ void init_spi1(){
     SPI1CONbits.ON = 1; 
 }
 
-// send a byte via spi and return the response
-unsigned char spi_io(unsigned char o) {
-  SPI1BUF = o;
-  while(!SPI1STATbits.SPIRBF) { // wait to receive the byte
-    ;
-  }
-  return SPI1BUF;
-}
+
 
 //set Voltage function
 //
-void setVoltage(char channel, float voltage){
-    int temp = voltage;
+void setVoltage(char channel, char voltage){
     CS = 0;
-    spi_io((channel << 15) | 0x7000 | (temp << 4))
+    spi_io((channel << 15) | 0x7000 | (voltage << 4));
     CS = 1;
+}
+//make the Sine and Triangle Waves
+void makeWaves(){
+    int i =0;
+    for(i = 0; i < 200; i++) {
+		triangleWave[i] = (255 * i) / 200;
+		sineWave[i] = (char)(127.5 + 127.5 * sin(2 * 3.1415926 * 0.1 * 5*i));
+	}  
 }
 
 int main(void) {
-    init_spi1();
-    
+    __builtin_disable_interrupts();
 
+    // set the CP0 CONFIG register to indicate that kseg0 is cacheable (0x3)
+    __builtin_mtc0(_CP0_CONFIG, _CP0_CONFIG_SELECT, 0xa4210583);
+
+    // 0 data RAM access wait states
+    BMXCONbits.BMXWSDRM = 0x0;
+
+    // enable multi vector interrupts
+    INTCONbits.MVEC = 0x1;
+
+    // disable JTAG to get pins back
+    DDPCONbits.JTAGEN = 0;
+
+    // do your TRIS and LAT commands here
+
+    __builtin_enable_interrupts();
+    
+    init_spi1();
+    makeWaves();
+    
     while(1) {
-      ;
+        static int count = 0;
+        if (_CP0_GET_COUNT() >= 24000) {
+            _CP0_SET_COUNT(0);
+            setVoltage(0, sineWave[count]);
+            setVoltage(1, triangleWave[count]);
+            count++;
+            if (count > 199)
+                count = 0;
+        }
     }
     return 0;
 }
