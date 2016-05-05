@@ -196,13 +196,15 @@ void display_character(char c, unsigned short x, unsigned short y){
     int col = 0;
     int row = 0;
     for(col=0; col < 5; col++){
+        char c = 0x01;
         for(row=0; row < 8; row++){
-            LCD_drawPixel(x+col,y+row,0xffff);
-//            if((ASCII[temp][col]<< row) >> 7){
-//                LCD_drawPixel(x+col,y+row,0xffff);
-//            } else {
-//                LCD_drawPixel(x+col,y+row,0x0000);
-//            }
+//            LCD_drawPixel(x+col,y+row,0xffff);
+            if((ASCII[temp][col] & c) >> row){
+                LCD_drawPixel(x+col,y+row,0xffff);
+            } else {
+                LCD_drawPixel(x+col,y+row,0xf800);
+            }
+            c = c << 1;
         }
     }
 }
@@ -225,7 +227,7 @@ int main(void) {
 //    }
     
     char message[10];
-    sprintf(message,"hello BNG");
+    sprintf(message,"HELLO BNG");
     int i=0;
     while(i<10){
         display_character(message[i],10+i*7,10);
