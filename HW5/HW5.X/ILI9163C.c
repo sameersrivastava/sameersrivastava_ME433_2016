@@ -200,9 +200,9 @@ void display_character(char c, unsigned short x, unsigned short y){
         for(row=0; row < 8; row++){
 //            LCD_drawPixel(x+col,y+row,0xffff);
             if((ASCII[temp][col] & c) >> row){
-                LCD_drawPixel(x+col,y+row,0xffff);
+                LCD_drawPixel(x+col,y+row,0x07e0);
             } else {
-                LCD_drawPixel(x+col,y+row,0xf800);
+                LCD_drawPixel(x+col,y+row,0x0000);
             }
             c = c << 1;
         }
@@ -227,12 +227,24 @@ int main(void) {
 //    }
     
     char message[10];
-    sprintf(message,"HELLO BNG");
+    sprintf(message,"Hello wor");
     int i=0;
-    while(i<10){
-        display_character(message[i],10+i*7,10);
+    int c=0;
+    while(message[i]){
+        display_character(message[i],10+c*7,32);
         i++;
+        c++;
     }
+    
+    int num = 1337;
+    sprintf(message,"ld %d!",num);
+    i=0;
+    while (message[i]) {
+        display_character(message[i], 10+c*7, 32);
+        i++;
+        c++;
+    }
+    
     while(1){
         ;
     }
