@@ -191,10 +191,9 @@ void LCD_clearScreen(unsigned short color) {
 }
 
 int main(void) {
+    SPI1_init(); 
+    LCD_init();
     
-    
-    while(1) {
-       
-    }
+        LCD_clearScreen(0xffff);
     return 0;
 }
