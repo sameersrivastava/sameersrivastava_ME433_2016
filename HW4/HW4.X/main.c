@@ -3,8 +3,8 @@
 
 #define CS LATBbits.LATB8 // chip select pin
 
-static volatile char sineWave[200];   // sine waveform
-static volatile char triangleWave[200];   // triangle waveform
+static volatile float sineWave[200];   // sine waveform
+static volatile float triangleWave[200];   // triangle waveform
 
 // send a byte via spi and return the response
 unsigned char spi_io(unsigned char o) {
@@ -37,38 +37,23 @@ void init_spi1(){
 
 //set Voltage function
 //
-void setVoltage(char channel, char voltage){
+void setVoltage(char channel, float voltage){
+    int temp = voltage;
     CS = 0;
-    spi_io((channel << 15) | 0x7000 | (voltage << 4));
+    spi_io((channel << 15) | 0x7000 | (temp << 4));
     CS = 1;
 }
 //make the Sine and Triangle Waves
 void makeWaves(){
     int i =0;
     for(i = 0; i < 200; i++) {
-		triangleWave[i] = (255 * i) / 200;
-		sineWave[i] = (char)(127.5 + 127.5 * sin(2 * 3.1415926 * 0.1 * 5*i));
+		triangleWave[i] = 255 * i / 200;
+		sineWave[i] = 127.5 + 127.5 * sin(2 * 3.1415926 * 10 * (i % 100) / 1000);
 	}  
 }
 
 int main(void) {
-    __builtin_disable_interrupts();
-
-    // set the CP0 CONFIG register to indicate that kseg0 is cacheable (0x3)
-    __builtin_mtc0(_CP0_CONFIG, _CP0_CONFIG_SELECT, 0xa4210583);
-
-    // 0 data RAM access wait states
-    BMXCONbits.BMXWSDRM = 0x0;
-
-    // enable multi vector interrupts
-    INTCONbits.MVEC = 0x1;
-
-    // disable JTAG to get pins back
-    DDPCONbits.JTAGEN = 0;
-
-    // do your TRIS and LAT commands here
-
-    __builtin_enable_interrupts();
+    
     
     init_spi1();
     makeWaves();
