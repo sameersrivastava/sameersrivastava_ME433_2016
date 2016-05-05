@@ -191,17 +191,18 @@ void LCD_clearScreen(unsigned short color) {
 		}
 }
 
-void display_character(char c,unsigned short x, unsigned short y){
-    int temp = c-20;
+void display_character(char c, unsigned short x, unsigned short y){
+    int temp = (int)c-32;
     int col = 0;
     int row = 0;
     for(col=0; col < 5; col++){
         for(row=0; row < 8; row++){
-            if((ASCII[temp][col]<< row) >> 7){
-                LCD_drawPixel(x+col,y+row,0xffff);
-            } else {
-                LCD_drawPixel(x+col,y+row,0xffff);
-            }
+            LCD_drawPixel(x+col,y+row,0xffff);
+//            if((ASCII[temp][col]<< row) >> 7){
+//                LCD_drawPixel(x+col,y+row,0xffff);
+//            } else {
+//                LCD_drawPixel(x+col,y+row,0x0000);
+//            }
         }
     }
 }
@@ -211,24 +212,25 @@ int main(void) {
     LCD_init();
     
     LCD_clearScreen(0x0000);
-    _CP0_SET_COUNT(0);
-    while(_CP0_GET_COUNT() < 12000000){
-            
-    }
-    int i =0;
-    for(;i<100;i++){
-        LCD_drawPixel(i+10,10,0xffff);
-        LCD_drawPixel(i+10,11,0xffff);
-        LCD_drawPixel(i+10,12,0xffff);
-        LCD_drawPixel(i+10,13,0xffff);
-    }
-//    char message[10];
-//    sprintf(message,"hello    ");
-//    int i=0;
-//    while(i<10){
-//        display_character(10+i*5,10,message[i]);
-//        i++;
+//    _CP0_SET_COUNT(0);
+//    while(_CP0_GET_COUNT() < 12000000){
+//            
 //    }
+//    int i =0;
+//    for(;i<100;i++){
+//        LCD_drawPixel(i+10,10,0xffff);
+//        LCD_drawPixel(i+10,11,0xffff);
+//        LCD_drawPixel(i+10,12,0xffff);
+//        LCD_drawPixel(i+10,13,0xffff);
+//    }
+    
+    char message[10];
+    sprintf(message,"hello BNG");
+    int i=0;
+    while(i<10){
+        display_character(message[i],10+i*7,10);
+        i++;
+    }
     while(1){
         ;
     }
