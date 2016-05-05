@@ -215,13 +215,20 @@ int main(void) {
     while(_CP0_GET_COUNT() < 12000000){
             
     }
-    char message[10];
-    sprintf(message,"hello    ");
-    int i=0;
-    while(i<10){
-        display_character(10+i*5,10,message[i]);
-        i++;
+    int i =0;
+    for(;i<100;i++){
+        LCD_drawPixel(i+10,10,0xffff);
+        LCD_drawPixel(i+10,11,0xffff);
+        LCD_drawPixel(i+10,12,0xffff);
+        LCD_drawPixel(i+10,13,0xffff);
     }
+//    char message[10];
+//    sprintf(message,"hello    ");
+//    int i=0;
+//    while(i<10){
+//        display_character(10+i*5,10,message[i]);
+//        i++;
+//    }
     while(1){
         ;
     }
