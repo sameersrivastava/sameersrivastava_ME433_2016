@@ -15,6 +15,7 @@
 
 #include <xc.h>
 #include "ILI9163C.h"
+#include "PIC32.h"
 
 void SPI1_init() {
 	SDI1Rbits.SDI1R = 0b0100; // B8 is SDI1
@@ -190,10 +191,39 @@ void LCD_clearScreen(unsigned short color) {
 		}
 }
 
+void display_character(char c,unsigned short x, unsigned short y){
+    int temp = c-20;
+    int col = 0;
+    int row = 0;
+    for(col=0; col < 5; col++){
+        for(row=0; row < 8; row++){
+            if((ASCII[temp][col]<< row) >> 7){
+                LCD_drawPixel(x+col,y+row,0xffff);
+            } else {
+                LCD_drawPixel(x+col,y+row,0xffff);
+            }
+        }
+    }
+}
+
 int main(void) {
     SPI1_init(); 
     LCD_init();
     
-        LCD_clearScreen(0xffff);
+    LCD_clearScreen(0x0000);
+    _CP0_SET_COUNT(0);
+    while(_CP0_GET_COUNT() < 12000000){
+            
+    }
+    char message[10];
+    sprintf(message,"hello    ");
+    int i=0;
+    while(i<10){
+        display_character(10+i*5,10,message[i]);
+        i++;
+    }
+    while(1){
+        ;
+    }
     return 0;
 }
