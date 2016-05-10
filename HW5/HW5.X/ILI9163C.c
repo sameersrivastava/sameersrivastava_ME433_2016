@@ -226,24 +226,24 @@ int main(void) {
 //        LCD_drawPixel(i+10,13,0xffff);
 //    }
     
-    char message[10];
-    sprintf(message,"Hello wor");
-    int i=0;
+    char message[200];
+    sprintf(message,"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur tincidunt accumsan interdum.ed finibus iaculis sapien, consequat tincidunt mauris tempor id. Ut dictum sodales tellus.");
+    int i =0;
     int c=0;
     while(message[i]){
-        display_character(message[i],10+c*7,32);
+        display_character(message[i],10+(c%19)*6,10+10*(c/19));
         i++;
         c++;
     }
     
-    int num = 1337;
-    sprintf(message,"ld %d!",num);
-    i=0;
-    while (message[i]) {
-        display_character(message[i], 10+c*7, 32);
-        i++;
-        c++;
-    }
+//    int num = 1337;
+//    sprintf(message,"ents!",num);
+//    i=0;
+//    while (message[i]) {
+//        display_character(message[i], 10+c*6, 32);
+//        i++;
+//        c++;
+//    }
     
     while(1){
         ;
