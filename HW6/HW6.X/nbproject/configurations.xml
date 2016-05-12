@@ -5,6 +5,8 @@
                    displayName="Header Files"
                    projectFiles="true">
       <itemPath>i2c_master_noint.h</itemPath>
+      <itemPath>PIC32.h</itemPath>
+      <itemPath>ILI9163C.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
