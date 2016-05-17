@@ -253,7 +253,8 @@ int main() {
       
       
         char message[200];
-        sprintf(message, "Master Read: 0x%b", master_read0);
+//        sprintf(message, "Master Read: 0x%b", master_read0);
+        sprintf(message, "Master Read:");
         int i = 0;
         int c = 0;
         while (message[i]) {
