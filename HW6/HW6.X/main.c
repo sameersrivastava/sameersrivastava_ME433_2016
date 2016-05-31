@@ -227,7 +227,7 @@ void initIMU(void){
   i2c_master_start();
   i2c_master_send(SLAVE_ADDR << 1|0);     //IMU address
   i2c_master_send(0x11);                //CTRL2_G
-  i2c_master_send(0b1000001);            //1.66 kHz, 245 dps, gyroscope enabled
+  i2c_master_send(0b1000000);            //1.66 kHz, 245 dps, gyroscope enabled
   i2c_master_stop();
 
   i2c_master_start();
@@ -257,7 +257,17 @@ void I2C_read_multiple(char address, char read_register, unsigned char * data, c
         
     }
 }
-
+void writeToLCD(char * message, int x, int y){
+    
+    int i = 0;
+    int c = 0;
+    while (message[i]) {
+        display_character(message[i], x + (c % 19)*6, y + 10 * (c / 19));
+        i++;
+        c++;
+    }
+    
+}
 
 //============== End of IMU Functions========
 
@@ -287,31 +297,36 @@ int main() {
     
     
     char message[200];
-//        sprintf(message, "Master Read: 0x%b", master_read0);
-        sprintf(message, "Read:");
-        int i = 0;
-        int c = 0;
-        while (message[i]) {
-            display_character(message[i], 10 + (c % 19)*6, 10 + 10 * (c / 19));
-            i++;
-            c++;
-        }
     
     
     
 
     char data[14];
+    short temp;
     while(1) {
         I2C_read_multiple(SLAVE_ADDR, 0x20, data, 14);
-        short temperature = (data[1] << 8) | data[0];
-        sprintf(message, "temperature: %f", (float)temperature);
-        int i = 0;
-        int c = 0;
-        while (message[i]) {
-            display_character(message[i], 10 + (c % 19)*6, 10 + 10 * (c / 19));
-            i++;
-            c++;
-        }
+        temp = (data[1] << 8) | data[0];
+        sprintf(message, "Temp: %3.3f", (float) temp);
+        writeToLCD(message,10,10);
+        temp = (data[3] << 8) | data[2];
+        sprintf(message, "X-ang: %3.3f dps", (float) temp*0.0074);
+        writeToLCD(message,10,20);
+        temp = (data[5] << 8) | data[4];
+        sprintf(message, "Y-ang: %3.3f dps", (float) temp*0.0074);
+        writeToLCD(message,10,30);
+        temp = (data[7] << 8) | data[6];
+        sprintf(message, "Z-ang: %3.3f dps", (float) temp*0.0074);
+        writeToLCD(message,10,40);
+        temp = (data[9] << 8) | data[8];
+        sprintf(message, "X-accel: %3.3f g", (float) temp*0.0000610);
+        writeToLCD(message,10,50);
+        temp = (data[11] << 8) | data[10];
+        sprintf(message, "Y-accel: %3.3f g", (float) temp*0.0000610);
+        writeToLCD(message,10,60);
+        temp = (data[13] << 8) | data[12];
+        sprintf(message, "Z-accel: %3.3f g", (float) temp*0.0000610);
+        writeToLCD(message,10,70);
+        
         
         
           
