@@ -236,6 +236,29 @@ void initIMU(void){
   i2c_master_send(0b00000100);           //IF_INC enabled
   i2c_master_stop();
 }
+
+void I2C_read_multiple(char address, char read_register, unsigned char * data, char length){
+    i2c_master_start(); // Begin the start sequence
+    i2c_master_send((address << 1) | 0); // send the slave address, left shifted by 1, 
+    // which clears bit 0, indicating a write
+    i2c_master_send(read_register); // send a byte to the slave       
+    i2c_master_restart(); // send a RESTART so we can begin reading 
+    i2c_master_send((address << 1) | 1);
+    //Begin reading
+    int i = 0;
+    for(i=0; i < length; i += 1){
+        data[i] = i2c_master_recv();       
+        if(i == (length - 1)){
+            i2c_master_ack(1);                      // send ACK (0): master wants another byte!
+            i2c_master_stop();
+        } else {
+            i2c_master_ack(0);
+        }
+        
+    }
+}
+
+
 //============== End of IMU Functions========
 
 int main() {
@@ -275,26 +298,13 @@ int main() {
         }
     
     
-    // some initialization function to set the right speed setting
-    unsigned char master_write0 = 0x0F;       // register to read from 
-    unsigned char master_write1 = 0x91;       // 
-    unsigned char master_read0  = 0x00;       // first received byte
+    
 
-
+    char data[14];
     while(1) {
-        i2c_master_start();                     // Begin the start sequence
-        i2c_master_send((SLAVE_ADDR << 1) | 0);       // send the slave address, left shifted by 1, 
-                                              // which clears bit 0, indicating a write
-        i2c_master_send(0x0F);         // send a byte to the slave       
-        i2c_master_restart();                   // send a RESTART so we can begin reading 
-        i2c_master_send((SLAVE_ADDR << 1) | 1); // send slave address, left shifted by 1,
-                                              // and then a 1 in lsb, indicating read
-        master_read0 = i2c_master_recv();       // receive a byte from the bus
-        i2c_master_ack(1);                      // send ACK (0): master wants another byte!
-        i2c_master_stop();                      // send STOP:  end transmission, give up bus
-        
-        sprintf(message, "Read: 0x%x", master_read0);
-//        sprintf(message, "Read: 0x");
+        I2C_read_multiple(SLAVE_ADDR, 0x20, data, 14);
+        short temperature = (data[1] << 8) | data[0];
+        sprintf(message, "temperature: %f", (float)temperature);
         int i = 0;
         int c = 0;
         while (message[i]) {
@@ -302,10 +312,7 @@ int main() {
             i++;
             c++;
         }
-//        num = num + 1;
-//        if(num > 1000){
-//            num = 0;
-//        }
+        
         
           
     }
