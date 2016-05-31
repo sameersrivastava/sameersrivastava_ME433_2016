@@ -9,7 +9,7 @@
 // SDA5 -> SDA1
 // SCL5 -> SCL1
 // Two bytes will be written to the slave and then read back to the slave.
-#define SLAVE_ADDR  0b01101001
+#define SLAVE_ADDR  0b1101011   
 //=========================LCD Function======================
 
 void SPI1_init() {
@@ -217,44 +217,55 @@ void display_character(char c, unsigned short x, unsigned short y) {
 }
 
 //================END OF LCD FUNCTIONS ==============
+void initIMU(void){
+  i2c_master_start();
+  i2c_master_send(SLAVE_ADDR << 1|0);      //IMU address
+  i2c_master_send(0x10);                 //CTRL1_XL
+  i2c_master_send(0b10000000);            //1.66 kHz, 2g, 400Hz
+  i2c_master_stop();
 
+  i2c_master_start();
+  i2c_master_send(SLAVE_ADDR << 1|0);     //IMU address
+  i2c_master_send(0x11);                //CTRL2_G
+  i2c_master_send(0b1000001);            //1.66 kHz, 245 dps, gyroscope enabled
+  i2c_master_stop();
+
+  i2c_master_start();
+  i2c_master_send(SLAVE_ADDR << 1|0);     //IMU address
+  i2c_master_send(0x12);                //CTRL3_C
+  i2c_master_send(0b00000100);           //IF_INC enabled
+  i2c_master_stop();
+}
+//============== End of IMU Functions========
 
 int main() {
+    __builtin_disable_interrupts();
+
+    // set the CP0 CONFIG register to indicate that kseg0 is cacheable (0x3)
+    __builtin_mtc0(_CP0_CONFIG, _CP0_CONFIG_SELECT, 0xa4210583);
+
+    // 0 data RAM access wait states
+    BMXCONbits.BMXWSDRM = 0x0;
+
+    // enable multi vector interrupts
+    INTCONbits.MVEC = 0x1;
+
+    // disable JTAG to get pins back
+    DDPCONbits.JTAGEN = 0;
+
+    i2c_master_setup();
+    initIMU();
+
+    __builtin_enable_interrupts();
     SPI1_init();
     LCD_init();
 
     LCD_clearScreen(0x0000);
-
     
     
-    // some initialization function to set the right speed setting
-    unsigned char master_write0 = 0x0F;       // register to read from 
-    unsigned char master_write1 = 0x91;       // 
-    unsigned char master_read0  = 0x00;       // first received byte
-
-    // some initialization function to set the right speed settin
-    __builtin_disable_interrupts();
-//    i2c_slave_setup(SLAVE_ADDR);              // init I2C5, which we use as a slave 
-                                              //  (comment out if slave is on another pic)
-    i2c_master_setup();                       // init I2C2, which we use as a master
-    __builtin_enable_interrupts();
-
-    while(1) {
-        i2c_master_start();                     // Begin the start sequence
-        i2c_master_send(SLAVE_ADDR << 1 | 0);       // send the slave address, left shifted by 1, 
-                                              // which clears bit 0, indicating a write
-        i2c_master_send(master_write0);         // send a byte to the slave       
-        i2c_master_restart();                   // send a RESTART so we can begin reading 
-        i2c_master_send((SLAVE_ADDR << 1) | 1); // send slave address, left shifted by 1,
-                                              // and then a 1 in lsb, indicating read
-        master_read0 = i2c_master_recv();       // receive a byte from the bus
-        i2c_master_ack(1);                      // send ACK (0): master wants another byte!
-        i2c_master_stop();                      // send STOP:  end transmission, give up bus
-      
-      
-        char message[200];
+    char message[200];
 //        sprintf(message, "Master Read: 0x%b", master_read0);
-        sprintf(message, "Master Read:");
+        sprintf(message, "Read:");
         int i = 0;
         int c = 0;
         while (message[i]) {
@@ -262,6 +273,41 @@ int main() {
             i++;
             c++;
         }
+    
+    
+    // some initialization function to set the right speed setting
+    unsigned char master_write0 = 0x0F;       // register to read from 
+    unsigned char master_write1 = 0x91;       // 
+    unsigned char master_read0  = 0x00;       // first received byte
+
+
+    while(1) {
+        i2c_master_start();                     // Begin the start sequence
+        i2c_master_send((SLAVE_ADDR << 1) | 0);       // send the slave address, left shifted by 1, 
+                                              // which clears bit 0, indicating a write
+        i2c_master_send(0x0F);         // send a byte to the slave       
+        i2c_master_restart();                   // send a RESTART so we can begin reading 
+        i2c_master_send((SLAVE_ADDR << 1) | 1); // send slave address, left shifted by 1,
+                                              // and then a 1 in lsb, indicating read
+        master_read0 = i2c_master_recv();       // receive a byte from the bus
+        i2c_master_ack(1);                      // send ACK (0): master wants another byte!
+        i2c_master_stop();                      // send STOP:  end transmission, give up bus
+        
+        sprintf(message, "Read: 0x%x", master_read0);
+//        sprintf(message, "Read: 0x");
+        int i = 0;
+        int c = 0;
+        while (message[i]) {
+            display_character(message[i], 10 + (c % 19)*6, 10 + 10 * (c / 19));
+            i++;
+            c++;
+        }
+//        num = num + 1;
+//        if(num > 1000){
+//            num = 0;
+//        }
+        
+          
     }
     return 0;
 }
