@@ -432,7 +432,7 @@ void APP_Tasks ( void )
             if(appData.isReadComplete == true)
             {
                 appData.isReadComplete = false;
-                DRV_USART_Write(appData.usartHandle, appData.readBuffer, appData.readLength);
+//                DRV_USART_Write(appData.usartHandle, appData.readBuffer, appData.readLength);
                 USB_DEVICE_CDC_Read (appData.cdcInstance, &appData.readTransferHandle,
                         appData.readBuffer, APP_READ_BUFFER_SIZE);
                 
@@ -449,7 +449,7 @@ void APP_Tasks ( void )
             }
 
             /* Check if a character was received on the UART */
-            if (appData.readBuffer[0] == '\r'|| appData.readBuffer[0] == '\r') // correctly receiving the data! 
+            if (appData.readBuffer[0] == 'a') // correctly receiving the data! 
             {
 //                TRISAbits.TRISA4 = 0; // Set green LED(A4) as output ON
                 LATAbits.LATA4 = ~LATAbits.LATA4;
@@ -461,7 +461,7 @@ void APP_Tasks ( void )
 //                appData.uartReceivedData[2] = '\r'; // carriage return 
 //                appData.uartReceivedData[3] = '\n'; // new line! 
                 char tx[100];
-                int len = sprintf(tx,"qq = test\r\n");
+                int len = sprintf(tx,"blah = test\r\n");
                 int ii = 0;
                 for (ii = 0;ii<len;ii++) {
                     appData.uartReceivedData[ii]=tx[ii];
