@@ -212,6 +212,7 @@ public class SerialConsoleActivity extends Activity {
                 + HexDump.dumpHexString(data) + "\n\n";
         mDumpTextView.append(message);
         mScrollView.smoothScrollTo(0, mDumpTextView.getBottom());
+        byte[] sData = {'a',0}; try { sPort.write(sData, 10); } catch (IOException e) { }
     }
 
     /**
