@@ -456,21 +456,21 @@ void APP_Tasks ( void )
                 
                 /* We have received data on the UART */
                 
-                appData.uartReceivedData[0] = 'h';
-                appData.uartReceivedData[1] = 'i';
-                appData.uartReceivedData[2] = '\r'; // carriage return 
-                appData.uartReceivedData[3] = '\n'; // new line! 
-//                char tx[100];
-//                sprintf(tx,"qq = test\r\n");
-//                int ii = 0;
-//                for (ii = 0;ii<13;ii++) {
-//                    appData.uartReceivedData[ii]=tx[ii];
-//                }
+//                appData.uartReceivedData[0] = 'h';
+//                appData.uartReceivedData[1] = 'i';
+//                appData.uartReceivedData[2] = '\r'; // carriage return 
+//                appData.uartReceivedData[3] = '\n'; // new line! 
+                char tx[100];
+                int len = sprintf(tx,"qq = test\r\n");
+                int ii = 0;
+                for (ii = 0;ii<len;ii++) {
+                    appData.uartReceivedData[ii]=tx[ii];
+                }
                 
 //               
                         
                 USB_DEVICE_CDC_Write(0, &appData.writeTransferHandle,
-                        appData.uartReceivedData, 4,
+                        appData.uartReceivedData, len,
                         USB_DEVICE_CDC_TRANSFER_FLAGS_DATA_COMPLETE);
                 
                 appData.readBuffer[0] = '0'; // use this as a reset! 
