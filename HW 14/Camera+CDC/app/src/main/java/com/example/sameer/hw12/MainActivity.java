@@ -79,6 +79,7 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
     public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
         mCamera = Camera.open();
         Camera.Parameters parameters = mCamera.getParameters();
+//        parameters.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
         parameters.setPreviewSize(640, 480);
         parameters.setColorEffect(Camera.Parameters.EFFECT_MONO); // black and white
         parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_INFINITY); // no autofocusing
@@ -113,7 +114,7 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
             int startY = 15;
             int wbTotal = 0; // total mass
             int wbCOM = 0; // total (mass time position)
-            for(int currentY = 10; currentY < 20; currentY += 1) {
+            for(int currentY = startY-5; currentY < startY+5; currentY += 1) {
                 int[] pixels = new int[bmp.getWidth()];
                 // which row in the bitmap to analyse to read
                 // only look at one row in the image
@@ -130,12 +131,15 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
                     // sum the red, green and blue, subtract from 255 to get the darkness of the pixel.
                     // if it is greater than some value (600 here), consider it black
                     // play with the 600 value if you are having issues reliably seeing the line
-                    if (255 * 3 - (red(pixels[i]) + green(pixels[i]) + blue(pixels[i])) > thresh * 6) {
+//                    if (255*3-(red(pixels[i])+green(pixels[i])+blue(pixels[i])) > thresh*6) {
+//                    if (255*3-(red(pixels[i])+green(pixels[i])+blue(pixels[i])) > (480+thresh)) {
+                    if (255*3-(red(pixels[i])+green(pixels[i])+blue(pixels[i])) > (480+thresh)) {
+                        //Green pixels
                         thresholdedPixels[i] = 255 * 3;
-                        thresholdedColors[i] = rgb(0, 255, 0);
+                        thresholdedColors[i] = rgb(0, 0, 0);
                     } else {
                         thresholdedPixels[i] = 0;
-                        thresholdedColors[i] = rgb(0, 0, 0);
+                        thresholdedColors[i] = rgb(0, 255, 0);
 
                     }
                     if(currentY == startY) {
@@ -159,6 +163,8 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
 
             // also write the value as text
             canvas.drawText("COM = " + COM, 10, 200, paint1);
+//            canvas.drawText("THRESHOLD = " + thresh*6, 10, 230, paint1);
+            canvas.drawText("THRESHOLD = " + 480+thresh, 10, 230, paint1);
             c.drawBitmap(bmp, 0, 0, null);
             mSurfaceHolder.unlockCanvasAndPost(c);
 
