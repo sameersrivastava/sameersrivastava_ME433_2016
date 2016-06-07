@@ -357,6 +357,33 @@ void APP_Initialize ( void )
     
     appData.uartReceivedData = &uartReceivedData;
     TRISAbits.TRISA4 = 0; // Set green LED(A4) as output ON
+    
+    //PWM
+    
+    
+    
+
+    T2CONbits.TCKPS = 4; // Timer2 prescaler N=1 (1:8)
+    PR2 = 2999; // period = (PR2+1) * N * 1 / 48000000 s = 1 ms
+    TMR2 = 0; // initial TMR2 count is 0
+    T2CONbits.ON = 1; // Turn on timer
+    
+    
+    RPB7Rbits.RPB7R = 0b0101; // OC1 - pin 16 - B7
+    OC1CONbits.OCM = 0x06;
+    OC1CONbits.OCTSEL = 0;
+     // PWM mode without fault pin; other OC1CON bits are defaults
+    OC1RS = 1500; // duty cycle = OC1RS/(PR2+1) = 50%
+    OC1R = 1500; // initialize before turning OC1 on; afterward it is read-only
+    OC1CONbits.ON = 1; // turn on OC1 
+    
+    
+    RPB8Rbits.RPB8R = 0b0101; // OC2 - pin 17 - B8
+    OC2CONbits.OCM = 0x06; // PWM mode without fault pin; other OC2CON bits are defaults
+    OC2CONbits.OCTSEL = 0;
+    OC2RS = 1500; // duty cycle = OC2RS/(PR2+1) = 50%
+    OC2R = 1500; // initialize before turning OC2 on; afterward it is read-only 
+    OC2CONbits.ON = 1; // turn on OC2
 }
 
 
@@ -452,31 +479,40 @@ void APP_Tasks ( void )
             if (appData.readBuffer[0] == 'a') // correctly receiving the data! 
             {
 //                TRISAbits.TRISA4 = 0; // Set green LED(A4) as output ON
-                LATAbits.LATA4 = ~LATAbits.LATA4;
                 
+                LATAbits.LATA4 = ~LATAbits.LATA4;
+                _CP0_SET_COUNT(0);
+                while (_CP0_GET_COUNT() < 12000000) {
+
+                }
                 /* We have received data on the UART */
                 
 //                appData.uartReceivedData[0] = 'h';
 //                appData.uartReceivedData[1] = 'i';
 //                appData.uartReceivedData[2] = '\r'; // carriage return 
 //                appData.uartReceivedData[3] = '\n'; // new line! 
-                char tx[100];
-                int len = sprintf(tx,"blah = test\r\n");
-                int ii = 0;
-                for (ii = 0;ii<len;ii++) {
-                    appData.uartReceivedData[ii]=tx[ii];
-                }
+                // Setup OC1 and OC2
+                // pins
+                //Setup OC1 and OC2 pins
+               
                 
-//               
-                        
-                USB_DEVICE_CDC_Write(0, &appData.writeTransferHandle,
-                        appData.uartReceivedData, len,
-                        USB_DEVICE_CDC_TRANSFER_FLAGS_DATA_COMPLETE);
                 
                 appData.readBuffer[0] = '0'; // use this as a reset! 
                 
                
             }
+            char tx[100];
+            int len = sprintf(tx, "blah = test\r\n");
+            int ii = 0;
+            for (ii = 0; ii < len; ii++) {
+                appData.uartReceivedData[ii] = tx[ii];
+            }
+
+            //               
+
+            USB_DEVICE_CDC_Write(0, &appData.writeTransferHandle,
+                    appData.uartReceivedData, len,
+                    USB_DEVICE_CDC_TRANSFER_FLAGS_DATA_COMPLETE);
 
             appData.state = APP_STATE_CHECK_CDC_READ;
             break;
