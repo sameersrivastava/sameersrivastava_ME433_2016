@@ -11,6 +11,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.TextureView;
 import android.view.WindowManager;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import java.io.IOException;
 import static android.graphics.Color.blue;
@@ -19,6 +20,7 @@ import static android.graphics.Color.red;
 import static android.graphics.Color.rgb;
 
 public class MainActivity extends Activity implements TextureView.SurfaceTextureListener {
+    SeekBar myControl;
     private Camera mCamera;
     private TextureView mTextureView;
     private SurfaceView mSurfaceView;
@@ -27,6 +29,8 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
     private Canvas canvas = new Canvas(bmp);
     private Paint paint1 = new Paint();
     private TextView mTextView;
+
+    int thresh;
 
     static long prevtime = 0; // for FPS calculation
 
@@ -45,6 +49,31 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
 
         paint1.setColor(0xffff0000); // red
         paint1.setTextSize(24);
+
+        //SeekBar
+        myControl = (SeekBar) findViewById(R.id.seek1);
+        setMyControlListener();
+    }
+    private void setMyControlListener() {
+        myControl.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+            int progressChanged = 0;
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                progressChanged = progress;
+                thresh = progress;
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
     }
 
     public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
@@ -99,7 +128,7 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
                 // sum the red, green and blue, subtract from 255 to get the darkness of the pixel.
                 // if it is greater than some value (600 here), consider it black
                 // play with the 600 value if you are having issues reliably seeing the line
-                if (255*3-(red(pixels[i])+green(pixels[i])+blue(pixels[i])) > 600) {
+                if (255*3-(red(pixels[i])+green(pixels[i])+blue(pixels[i])) > thresh*6) {
                     thresholdedPixels[i] = 255*3;
                     thresholdedColors[i] = rgb(0, 255, 0);
                 }
