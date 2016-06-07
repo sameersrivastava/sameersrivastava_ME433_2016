@@ -50,12 +50,14 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 
 #include "app.h"
 char rx[100];
+char tx[100];
 int txFlag = 0;
 int pos = 0;
 int qq = 0;
+int pp = 0;
 //int ocFlag = 1;
 int leftPWM = 1500;
-//int rightPWM = 1500;
+int rightPWM = 1500;
 
 
 // *****************************************************************************
@@ -210,9 +212,9 @@ void APP_USBDeviceEventHandler ( USB_DEVICE_EVENT event, void * eventData, uintp
              * all function drivers. Update LEDs to indicate
              * reset/deconfigured state. */
 
-            BSP_LEDOn ( APP_USB_LED_1 );
-            BSP_LEDOn ( APP_USB_LED_2  );
-            BSP_LEDOff( APP_USB_LED_3  );
+//            BSP_LEDOn ( APP_USB_LED_1 );
+//            BSP_LEDOn ( APP_USB_LED_2  );
+//            BSP_LEDOff( APP_USB_LED_3  );
 
             appData.isConfigured = false;
 
@@ -226,9 +228,9 @@ void APP_USBDeviceEventHandler ( USB_DEVICE_EVENT event, void * eventData, uintp
             {
                 /* The device is in configured state. Update LED indication */
 
-                BSP_LEDOff( APP_USB_LED_1 );
-                BSP_LEDOff( APP_USB_LED_2  );
-                BSP_LEDOn( APP_USB_LED_3  );
+//                BSP_LEDOff( APP_USB_LED_1 );
+//                BSP_LEDOff( APP_USB_LED_2  );
+//                BSP_LEDOn( APP_USB_LED_3  );
 
                 /* Register the CDC Device application event handler here.
                  * Note how the appData object pointer is passed as the
@@ -246,9 +248,9 @@ void APP_USBDeviceEventHandler ( USB_DEVICE_EVENT event, void * eventData, uintp
         case USB_DEVICE_EVENT_SUSPENDED:
 
             /* Update LEDs */
-            BSP_LEDOff ( APP_USB_LED_1 );
-            BSP_LEDOn ( APP_USB_LED_2  );
-            BSP_LEDOn( APP_USB_LED_3  );
+//            BSP_LEDOff ( APP_USB_LED_1 );
+//            BSP_LEDOn ( APP_USB_LED_2  );
+//            BSP_LEDOn( APP_USB_LED_3  );
             break;
 
         
@@ -475,8 +477,10 @@ void APP_Tasks ( void )
                         rx[pos] = 0;
                         txFlag = 1;
                         pos = 0;
-                        sscanf(rx, "%d", &qq);
-                        leftPWM = qq;
+                        sscanf(rx, "%d %d", &qq, &pp);
+                        OC1RS = qq;
+                        OC2RS = pp;
+                        
                     } else {
                         rx[pos] = appData.readBuffer[ii];
                         pos++;
@@ -496,19 +500,19 @@ void APP_Tasks ( void )
             }
 
             if (txFlag == 1) {
-                char tx[100];
+               
                 char len = 0;
 //                if (ocFlag == 1){
-                    len = sprintf(tx,"OC1RS = %d\r\n",leftPWM);
-                    OC1RS = leftPWM;
+//                    len = sprintf(tx,"OC1RS = %d OC2RS = %d\r\n",qq,pp);
+                len = sprintf(tx,"Did it!\r\n");
+//                    leftPWM = qq;
+////                    leftPWM = qq;
+////                    rightPWM = qq - 1000*leftPWM;
+//                    rightPWM = pp;
+//                    OC1RS = leftPWM;
+//                    OC2RS = rightPWM;
                     
-//                    break;
-//                } else if (ocFlag == 2){
-//                    len = sprintf(tx,"OC1RS = %d\r\n",qq);
-//                    OC2RS = qq;
-//                    ocFlag = 1;
-//                    break;
-//                }
+//                
                 int ii;
                 for (ii = 0;ii<len;ii++) {
                     appData.uartReceivedData[ii]=tx[ii];
