@@ -24,14 +24,22 @@ package com.hoho.android.usbserial.examples;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.hardware.Camera;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
+import android.view.TextureView;
 import android.view.WindowManager;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ScrollView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.hoho.android.usbserial.driver.UsbSerialPort;
@@ -69,6 +77,25 @@ public class SerialConsoleActivity extends Activity {
     private ScrollView mScrollView;
     private CheckBox chkDTR;
     private CheckBox chkRTS;
+
+    //Camera
+    SeekBar myControl;
+    private Camera mCamera;
+    private TextureView mTextureView;
+    private SurfaceView mSurfaceView;
+    private SurfaceHolder mSurfaceHolder;
+    private Bitmap bmp = Bitmap.createBitmap(640,480,Bitmap.Config.ARGB_8888);
+    private Canvas canvas = new Canvas(bmp);
+    private Paint paint1 = new Paint();
+    private TextView mTextView;
+
+    int thresh;
+
+    static long prevtime = 0; // for FPS calculation
+
+
+
+    //
 
     private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
 
