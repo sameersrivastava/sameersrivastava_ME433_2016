@@ -53,6 +53,9 @@ char rx[100];
 int txFlag = 0;
 int pos = 0;
 int qq = 0;
+//int ocFlag = 1;
+int leftPWM = 1500;
+//int rightPWM = 1500;
 
 
 // *****************************************************************************
@@ -473,6 +476,7 @@ void APP_Tasks ( void )
                         txFlag = 1;
                         pos = 0;
                         sscanf(rx, "%d", &qq);
+                        leftPWM = qq;
                     } else {
                         rx[pos] = appData.readBuffer[ii];
                         pos++;
@@ -493,7 +497,18 @@ void APP_Tasks ( void )
 
             if (txFlag == 1) {
                 char tx[100];
-                char len = sprintf(tx,"qq = %d\r\n",qq);
+                char len = 0;
+//                if (ocFlag == 1){
+                    len = sprintf(tx,"OC1RS = %d\r\n",leftPWM);
+                    OC1RS = leftPWM;
+                    
+//                    break;
+//                } else if (ocFlag == 2){
+//                    len = sprintf(tx,"OC1RS = %d\r\n",qq);
+//                    OC2RS = qq;
+//                    ocFlag = 1;
+//                    break;
+//                }
                 int ii;
                 for (ii = 0;ii<len;ii++) {
                     appData.uartReceivedData[ii]=tx[ii];
