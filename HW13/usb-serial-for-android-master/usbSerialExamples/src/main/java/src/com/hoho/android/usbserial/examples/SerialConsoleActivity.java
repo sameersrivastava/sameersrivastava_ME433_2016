@@ -164,13 +164,18 @@ public class SerialConsoleActivity extends Activity {
                 sPort.open(connection);
                 sPort.setParameters(115200, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
 
-                showStatus(mDumpTextView, "CD  - Carrier Detect", sPort.getCD());
-                showStatus(mDumpTextView, "CTS - Clear To Send", sPort.getCTS());
-                showStatus(mDumpTextView, "DSR - Data Set Ready", sPort.getDSR());
-                showStatus(mDumpTextView, "DTR - Data Terminal Ready", sPort.getDTR());
-                showStatus(mDumpTextView, "DSR - Data Set Ready", sPort.getDSR());
-                showStatus(mDumpTextView, "RI  - Ring Indicator", sPort.getRI());
-                showStatus(mDumpTextView, "RTS - Request To Send", sPort.getRTS());
+//                showStatus(mDumpTextView, "CD  - Carrier Detect", sPort.getCD());
+//                showStatus(mDumpTextView, "CTS - Clear To Send", sPort.getCTS());
+//                showStatus(mDumpTextView, "DSR - Data Set Ready", sPort.getDSR());
+//                showStatus(mDumpTextView, "DTR - Data Terminal Ready", sPort.getDTR());
+//                showStatus(mDumpTextView, "DSR - Data Set Ready", sPort.getDSR());
+//                showStatus(mDumpTextView, "RI  - Ring Indicator", sPort.getRI());
+//                showStatus(mDumpTextView, "RTS - Request To Send", sPort.getRTS());
+                String sData = "1000 2500\n\r";
+                try {
+                    sPort.write(sData.getBytes(), 10);
+                }
+                catch (IOException e) { }
 
             } catch (IOException e) {
                 Log.e(TAG, "Error setting up device: " + e.getMessage(), e);
@@ -214,7 +219,12 @@ public class SerialConsoleActivity extends Activity {
                 + HexDump.dumpHexString(data) + "\n\n";
         mDumpTextView.append(message);
         mScrollView.smoothScrollTo(0, mDumpTextView.getBottom());
-        byte[] sData = {'a',0}; try { sPort.write(sData, 10); } catch (IOException e) { }
+//        byte[] sData = {'a',0};
+//        String sData = "1000 2500\n\r";
+//        try {
+//            sPort.write(sData.getBytes(), 10);
+//        }
+//        catch (IOException e) { }
     }
 
     /**
