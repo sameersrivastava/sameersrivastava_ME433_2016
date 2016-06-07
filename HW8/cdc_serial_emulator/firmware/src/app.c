@@ -49,6 +49,10 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 
 #include "app.h"
+char rx[100];
+int txFlag = 0;
+int pos = 0;
+int qq = 0;
 
 
 // *****************************************************************************
@@ -374,7 +378,7 @@ void APP_Initialize ( void )
     OC1CONbits.OCTSEL = 0;
      // PWM mode without fault pin; other OC1CON bits are defaults
     OC1RS = 1500; // duty cycle = OC1RS/(PR2+1) = 50%
-    OC1R = 1500; // initialize before turning OC1 on; afterward it is read-only
+    OC1R = 0; // initialize before turning OC1 on; afterward it is read-only
     OC1CONbits.ON = 1; // turn on OC1 
     
     
@@ -382,7 +386,7 @@ void APP_Initialize ( void )
     OC2CONbits.OCM = 0x06; // PWM mode without fault pin; other OC2CON bits are defaults
     OC2CONbits.OCTSEL = 0;
     OC2RS = 1500; // duty cycle = OC2RS/(PR2+1) = 50%
-    OC2R = 1500; // initialize before turning OC2 on; afterward it is read-only 
+    OC2R = 0; // initialize before turning OC2 on; afterward it is read-only 
     OC2CONbits.ON = 1; // turn on OC2
 }
 
@@ -462,6 +466,18 @@ void APP_Tasks ( void )
 //                DRV_USART_Write(appData.usartHandle, appData.readBuffer, appData.readLength);
                 USB_DEVICE_CDC_Read (appData.cdcInstance, &appData.readTransferHandle,
                         appData.readBuffer, APP_READ_BUFFER_SIZE);
+                int ii;
+                for (ii = 0; ii < appData.readLength; ii++) {
+                    if (appData.readBuffer[ii] == '\n' || appData.readBuffer[ii] == '\r') {
+                        rx[pos] = 0;
+                        txFlag = 1;
+                        pos = 0;
+                        sscanf(rx, "%d", &qq);
+                    } else {
+                        rx[pos] = appData.readBuffer[ii];
+                        pos++;
+                    }
+                }
                 
             }
 
@@ -475,44 +491,18 @@ void APP_Tasks ( void )
                 break;
             }
 
-            /* Check if a character was received on the UART */
-            if (appData.readBuffer[0] == 'a') // correctly receiving the data! 
-            {
-//                TRISAbits.TRISA4 = 0; // Set green LED(A4) as output ON
-                
-                LATAbits.LATA4 = ~LATAbits.LATA4;
-                _CP0_SET_COUNT(0);
-                while (_CP0_GET_COUNT() < 12000000) {
-
+            if (txFlag == 1) {
+                char tx[100];
+                char len = sprintf(tx,"qq = %d\r\n",qq);
+                int ii;
+                for (ii = 0;ii<len;ii++) {
+                    appData.uartReceivedData[ii]=tx[ii];
                 }
-                /* We have received data on the UART */
-                
-//                appData.uartReceivedData[0] = 'h';
-//                appData.uartReceivedData[1] = 'i';
-//                appData.uartReceivedData[2] = '\r'; // carriage return 
-//                appData.uartReceivedData[3] = '\n'; // new line! 
-                // Setup OC1 and OC2
-                // pins
-                //Setup OC1 and OC2 pins
-               
-                
-                
-                appData.readBuffer[0] = '0'; // use this as a reset! 
-                
-               
+                USB_DEVICE_CDC_Write(0, &appData.writeTransferHandle,
+                        appData.uartReceivedData, len,
+                        USB_DEVICE_CDC_TRANSFER_FLAGS_DATA_COMPLETE);
+                txFlag = 0;
             }
-            char tx[100];
-            int len = sprintf(tx, "blah = test\r\n");
-            int ii = 0;
-            for (ii = 0; ii < len; ii++) {
-                appData.uartReceivedData[ii] = tx[ii];
-            }
-
-            //               
-
-            USB_DEVICE_CDC_Write(0, &appData.writeTransferHandle,
-                    appData.uartReceivedData, len,
-                    USB_DEVICE_CDC_TRANSFER_FLAGS_DATA_COMPLETE);
 
             appData.state = APP_STATE_CHECK_CDC_READ;
             break;
