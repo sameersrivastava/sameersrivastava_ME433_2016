@@ -86,6 +86,8 @@ public class SerialConsoleActivity extends Activity implements TextureView.Surfa
 
     //Camera
     SeekBar myControl;
+    SeekBar pwmControl;
+    SeekBar turningControl;
     private Camera mCamera;
     private TextureView mTextureView;
     private SurfaceView mSurfaceView;
@@ -96,6 +98,9 @@ public class SerialConsoleActivity extends Activity implements TextureView.Surfa
     private TextView mTextView;
 
     int thresh;
+    int turning_thresh;
+    int pwm_thresh;
+    int count = 0;
 
     static long prevtime = 0; // for FPS calculation
 
@@ -169,6 +174,9 @@ public class SerialConsoleActivity extends Activity implements TextureView.Surfa
 
         //SeekBar
         myControl = (SeekBar) findViewById(R.id.seek1);
+
+        turningControl = (SeekBar) findViewById(R.id.seek2);
+        pwmControl = (SeekBar) findViewById(R.id.seek3);
         setMyControlListener();
         //End of camera Stuff
 
@@ -182,6 +190,44 @@ public class SerialConsoleActivity extends Activity implements TextureView.Surfa
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 progressChanged = progress;
                 thresh = progress;
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+        turningControl.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+            int progressChanged = 0;
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                progressChanged = progress;
+                turning_thresh = progress;
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+        pwmControl.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+            int progressChanged = 0;
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                progressChanged = progress;
+                pwm_thresh = progress;
             }
 
             @Override
@@ -318,7 +364,7 @@ public class SerialConsoleActivity extends Activity implements TextureView.Surfa
         Camera.Parameters parameters = mCamera.getParameters();
 //        parameters.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
         parameters.setPreviewSize(640, 480);
-        parameters.setColorEffect(Camera.Parameters.EFFECT_MONO); // black and white
+        parameters.setColorEffect(Camera.Parameters.EFFECT_NONE); // black and white
         parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_INFINITY); // no autofocusing
         mCamera.setParameters(parameters);
         mCamera.setDisplayOrientation(90); // rotate to portrait mode
@@ -348,10 +394,10 @@ public class SerialConsoleActivity extends Activity implements TextureView.Surfa
 
         final Canvas c = mSurfaceHolder.lockCanvas();
         if (c != null) {
-            int startY = 15;
+            int startY = 150;
             int wbTotal = 0; // total mass
             int wbCOM = 0; // total (mass time position)
-            for(int currentY = startY-5; currentY < startY+5; currentY += 1) {
+            for(int currentY = startY; currentY < startY+1; currentY += 1) {
                 int[] pixels = new int[bmp.getWidth()];
                 // which row in the bitmap to analyse to read
                 // only look at one row in the image
@@ -363,6 +409,8 @@ public class SerialConsoleActivity extends Activity implements TextureView.Surfa
                 int[] thresholdedPixels = new int[bmp.getWidth()];
                 int[] thresholdedColors = new int[bmp.getWidth()];
 
+                count = 0;
+
 
                 for (int i = 0; i < bmp.getWidth(); i++) {
                     // sum the red, green and blue, subtract from 255 to get the darkness of the pixel.
@@ -370,14 +418,16 @@ public class SerialConsoleActivity extends Activity implements TextureView.Surfa
                     // play with the 600 value if you are having issues reliably seeing the line
 //                    if (255*3-(red(pixels[i])+green(pixels[i])+blue(pixels[i])) > thresh*6) {
 //                    if (255*3-(red(pixels[i])+green(pixels[i])+blue(pixels[i])) > (480+thresh)) {
-                    if (255*3-(red(pixels[i])+green(pixels[i])+blue(pixels[i])) > (480+thresh)) {
+//                    if (255*3-(red(pixels[i])+green(pixels[i])+blue(pixels[i])) > (500+thresh*2)) {
+//                    if (255*2-(red(pixels[i])+green(pixels[i])) > (260+thresh)) {
+                    if (red(pixels[i])>thresh*2) {
                         //Green pixels
                         thresholdedPixels[i] = 255 * 3;
                         thresholdedColors[i] = rgb(0, 0, 0);
+                        count += 1;
                     } else {
                         thresholdedPixels[i] = 0;
                         thresholdedColors[i] = rgb(0, 255, 0);
-
                     }
                     if(currentY == startY) {
                         wbTotal = wbTotal + thresholdedPixels[i];
@@ -397,11 +447,55 @@ public class SerialConsoleActivity extends Activity implements TextureView.Surfa
 
             // draw a circle where you think the COM is
             canvas.drawCircle(COM, startY, 5, paint1);
+            int leftPWM;
+            int rightPWM;
+            if((count > 60) && (count < 400)){
+                //Set PWM
+                int pwm_value = (pwm_thresh * 2999) / 100;
+                int temp = COM - 320;
+
+                if (temp < 0) { //left side
+                    leftPWM = pwm_value + ((temp * turning_thresh) / 10);
+                    rightPWM = pwm_value;
+
+                } else if (temp > 0) {
+                    leftPWM = pwm_value;
+                    rightPWM = pwm_value - ((temp * turning_thresh) / 10);
+
+                } else {
+                    leftPWM = pwm_value;
+                    rightPWM = pwm_value;
+                }
+            } else {
+                leftPWM = 600;
+                rightPWM = 600;
+
+                if(count < 60){//threshold is too high
+//                    myControl.setProgress(thresh-5);
+                    thresh = thresh - 5;
+                } else { //threshold is too low
+//                    myControl.setProgress(thresh+5);
+                    thresh = thresh + 5;
+                }
+
+            }
+
+//            String sData = "1000 2500\n\r";
+            String sData = String.valueOf(leftPWM) + " " + String.valueOf(rightPWM) + "\n\r";
+            try {
+                sPort.write(sData.getBytes(), 10);
+            }
+            catch (IOException e) { }
+
+            //Write PWM
 
             // also write the value as text
             canvas.drawText("COM = " + COM, 10, 200, paint1);
 //            canvas.drawText("THRESHOLD = " + thresh*6, 10, 230, paint1);
-            canvas.drawText("THRESHOLD = " + 480+thresh, 10, 230, paint1);
+            canvas.drawText("THRESHOLD = " + (thresh*2), 10, 230, paint1);
+            canvas.drawText("LEFTPWM = " + leftPWM, 10, 260, paint1);
+            canvas.drawText("RIGHTPWM = " + rightPWM, 10, 290, paint1);
+            canvas.drawText("COUNT = " + count, 10, 320, paint1);
             c.drawBitmap(bmp, 0, 0, null);
             mSurfaceHolder.unlockCanvasAndPost(c);
 
@@ -410,6 +504,9 @@ public class SerialConsoleActivity extends Activity implements TextureView.Surfa
             long diff = nowtime - prevtime;
             mTextView.setText("FPS " + 1000/diff);
             prevtime = nowtime;
+
+
+
         }
     }
     //End of Camera functions

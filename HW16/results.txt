@@ -1,0 +1,7 @@
+Video of robot running - https://www.youtube.com/watch?v=JPt2_jQyBY4
+
+The video shows me holding down the robot because it did not have enough traction to turn. I also corrected it a few times, but I hope that is ok.
+
+My robot worked by detecting red pixels on the mat because the green contains little red. Based off the location of the center of mass of the red pixels, I sent two PWM signals over the USB to the PIC. The PIC would then take the PWM numbers and put them to both motors. 
+
+I used three sliders in the app - one for the threshold of the pixels, one for turning, and one for pwm. The threshold slider was not used later, because I would detect how many pixels are detected as brown and adjust the threshold if the number was too low (didn't detect the line) or too high (the whole thing is a line). The turning slider was used to adjust how much the inside wheel turned when turning. If the slider was high then the wheel turned less and the robot turned more. I added this because it would get off the line because it could not turn enough. The pwm slider was used to control the highest pwm the robot would go to. This was so it would not overshoot the line when it curved.
